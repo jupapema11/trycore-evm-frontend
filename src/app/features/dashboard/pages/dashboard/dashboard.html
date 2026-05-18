@@ -4,10 +4,14 @@
   <!-- Dropdown for selecting a project -->
   <div class="project-selector">
     <label for="project">Select Project:</label>
-    <select #projectSelect (change)="loadActivities(projectSelect.value)">
+    <select id="project" class="styled-select" #projectSelect (change)="loadActivities(projectSelect.value)">
+
+      <option value="">Select a project</option>
+
       <option *ngFor="let project of projects" [value]="project.id">
         {{ project.name }}
       </option>
+
     </select>
   </div>
 
@@ -53,10 +57,14 @@
           <td>{{ activity.actualCost }}</td>
           <td>{{ activity.plannedProgressPercent * activity.budgetAtCompletion | number:'1.2-2' }}</td>
           <td>{{ activity.actualProgressPercent * activity.budgetAtCompletion | number:'1.2-2' }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion - activity.actualCost) | number:'1.2-2' }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion - activity.plannedProgressPercent * activity.budgetAtCompletion) | number:'1.2-2' }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion / activity.actualCost) | number:'1.2-2' }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion / (activity.plannedProgressPercent * activity.budgetAtCompletion)) | number:'1.2-2' }}</td>
+          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion - activity.actualCost) | number:'1.2-2'
+            }}</td>
+          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion - activity.plannedProgressPercent *
+            activity.budgetAtCompletion) | number:'1.2-2' }}</td>
+          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion / activity.actualCost) | number:'1.2-2'
+            }}</td>
+          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion / (activity.plannedProgressPercent *
+            activity.budgetAtCompletion)) | number:'1.2-2' }}</td>
         </tr>
       </tbody>
     </table>
