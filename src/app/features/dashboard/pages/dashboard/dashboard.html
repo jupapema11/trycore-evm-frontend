@@ -4,7 +4,7 @@
   <!-- Dropdown for selecting a project -->
   <div class="project-selector">
     <label for="project">Select Project:</label>
-    <select id="project" class="styled-select" #projectSelect (change)="loadActivities(projectSelect.value)">
+    <select class="styled-select" (change)="onProjectChange($event)">
 
       <option value="">Select a project</option>
 
@@ -18,14 +18,16 @@
   <!-- Consolidated Indicators -->
   <div class="consolidated-indicators">
     <h2>Consolidated Indicators</h2>
+
     <ul>
       <li>Total PV: {{ consolidatedIndicators.totalPV | number:'1.2-2' }}</li>
       <li>Total EV: {{ consolidatedIndicators.totalEV | number:'1.2-2' }}</li>
       <li>Total AC: {{ consolidatedIndicators.totalAC | number:'1.2-2' }}</li>
-      <li>CPI: {{ consolidatedIndicators.CPI | number:'1.2-2' }}</li>
-      <li>SPI: {{ consolidatedIndicators.SPI | number:'1.2-2' }}</li>
-      <li>EAC: {{ consolidatedIndicators.EAC | number:'1.2-2' }}</li>
-      <li>VAC: {{ consolidatedIndicators.VAC | number:'1.2-2' }}</li>
+
+      <li>CPI: {{ consolidatedIndicators.totalCPI | number:'1.2-2' }}</li>
+      <li>SPI: {{ consolidatedIndicators.totalSPI | number:'1.2-2' }}</li>
+      <li>EAC: {{ consolidatedIndicators.totalEAC | number:'1.2-2' }}</li>
+      <li>VAC: {{ consolidatedIndicators.totalVAC | number:'1.2-2' }}</li>
     </ul>
   </div>
 
@@ -55,16 +57,13 @@
           <td>{{ activity.plannedProgressPercent }}</td>
           <td>{{ activity.actualProgressPercent }}</td>
           <td>{{ activity.actualCost }}</td>
-          <td>{{ activity.plannedProgressPercent * activity.budgetAtCompletion | number:'1.2-2' }}</td>
-          <td>{{ activity.actualProgressPercent * activity.budgetAtCompletion | number:'1.2-2' }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion - activity.actualCost) | number:'1.2-2'
-            }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion - activity.plannedProgressPercent *
-            activity.budgetAtCompletion) | number:'1.2-2' }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion / activity.actualCost) | number:'1.2-2'
-            }}</td>
-          <td>{{ (activity.actualProgressPercent * activity.budgetAtCompletion / (activity.plannedProgressPercent *
-            activity.budgetAtCompletion)) | number:'1.2-2' }}</td>
+
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
         </tr>
       </tbody>
     </table>

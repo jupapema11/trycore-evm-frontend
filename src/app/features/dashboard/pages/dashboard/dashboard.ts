@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjectService } from '../../../projects/services/project.service';
 import { ActivityService } from '../../../activities/services/activity.service';
-import { EvmService } from '../../../../core/services/evm.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,22 +14,22 @@ export class DashboardComponent implements OnInit {
 
   projects: any[] = [];
   activities: any[] = [];
+
   selectedProjectId: string | null = null;
 
   consolidatedIndicators: any = {
     totalPV: 0,
     totalEV: 0,
     totalAC: 0,
-    CPI: 0,
-    SPI: 0,
-    EAC: 0,
-    VAC: 0
+    totalCPI: 0,
+    totalSPI: 0,
+    totalEAC: 0,
+    totalVAC: 0
   };
 
   constructor(
     private projectService: ProjectService,
     private activityService: ActivityService,
-    private evmService: EvmService,
     private cd: ChangeDetectorRef
   ) { }
 
@@ -38,78 +37,58 @@ export class DashboardComponent implements OnInit {
     this.loadProjects();
   }
 
-  // ✅ FIX: agrega getProjects en service
+  // ======================
+  // LOAD PROJECTS
+  // ======================
   loadProjects(): void {
     this.projectService.getProjects().subscribe({
       next: (projects: any[]) => {
-        this.projects = projects;
-        console.log('Projects loaded:', this.projects);
-        this.cd.detectChanges();
+        this.projects = projects ?? [];
       },
-      error: (err) => {
-        console.error('Error loading projects', err);
-      }
+      error: (err) => console.error(err)
     });
   }
 
-  // ✅ FIX: tipado seguro del event o string
+  // ======================
+  // ON SELECT PROJECT
+  // ======================
   loadActivities(projectId: string): void {
+
     this.selectedProjectId = projectId;
 
+    // 1. ACTIVITIES
     this.activityService.getActivities(projectId).subscribe({
       next: (activities) => {
-        this.activities = activities;
+        this.activities = activities ?? [];
+      }
+    });
 
-        // 🔥 tomar indicadores directamente de backend
-        const first = activities[0];
+    // 2. SUMMARY (🔥 IMPORTANTE)
+    this.projectService.getProjectSummary(projectId).subscribe({
+      next: (summary) => {
 
         this.consolidatedIndicators = {
-          totalPV: first.pv,
-          totalEV: first.ev,
-          totalAC: first.cv ? Math.abs(first.cv) : 0,
-          CPI: first.cpi,
-          SPI: first.spi,
-          EAC: first.eac,
-          VAC: first.vac
+          totalPV: summary.totalPV,
+          totalEV: summary.totalEV,
+          totalAC: summary.totalAC,
+          totalCPI: summary.totalCPI,
+          totalSPI: summary.totalSPI,
+          totalEAC: summary.totalEAC,
+          totalVAC: summary.totalVAC
         };
-      }
+
+        this.cd.detectChanges();
+      },
+      error: (err) => console.error('Summary error', err)
     });
   }
 
-  // ✅ FIX: evita NaN / division by zero
-  calculateConsolidatedIndicators(): void {
+  onProjectChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const projectId = selectElement.value;
 
-    let totalPV = 0;
-    let totalEV = 0;
-    let totalAC = 0;
-    let totalBAC = 0;
+    if (!projectId) return;
 
-    for (const activity of this.activities) {
-
-      const bac = activity.budgetAtCompletion ?? 0;
-      const planned = activity.plannedProgressPercent ?? 0;
-      const actual = activity.actualProgressPercent ?? 0;
-      const ac = activity.actualCost ?? 0;
-
-      totalBAC += bac;
-      totalPV += planned * bac;
-      totalEV += actual * bac;
-      totalAC += ac;
-    }
-
-    const CPI = totalAC !== 0 ? totalEV / totalAC : 0;
-    const SPI = totalPV !== 0 ? totalEV / totalPV : 0;
-    const EAC = CPI !== 0 ? totalBAC / CPI : 0;
-    const VAC = totalBAC - EAC;
-
-    this.consolidatedIndicators = {
-      totalPV,
-      totalEV,
-      totalAC,
-      CPI,
-      SPI,
-      EAC,
-      VAC
-    };
+    this.loadActivities(projectId);
   }
 }

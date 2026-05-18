@@ -26,4 +26,10 @@ export class ProjectService {
   getProjects(): Observable<any> {
     return this.http.get(this.api);
   }
+
+  getProjectSummary(projectId: string) {
+    return this.http.get<any>(
+      `https://localhost:44391/api/Projects/${projectId}/summary`
+    );
+  }
 }
