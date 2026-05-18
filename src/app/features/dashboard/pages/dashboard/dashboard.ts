@@ -44,8 +44,10 @@ export class DashboardComponent implements OnInit {
     this.projectService.getProjects().subscribe({
       next: (projects: any[]) => {
         this.projects = projects ?? [];
+        this.cd.detectChanges(); 
+        console.log('Proyectos cargados:', this.projects);
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error('Error cargando proyectos:', err)
     });
   }
 
