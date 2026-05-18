@@ -1,1 +1,53 @@
-<p>dashboard works!</p>
+<div class="container mt-5">
+
+  <h1 class="mb-4">
+    Trycore EVM Dashboard
+  </h1>
+
+  <div class="row" *ngIf="summary">
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow p-3">
+        <h6>CPI</h6>
+        <h2>{{ summary.totalCPI | number:'1.2-2' }}</h2>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow p-3">
+        <h6>SPI</h6>
+        <h2>{{ summary.totalSPI | number:'1.2-2' }}</h2>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow p-3">
+        <h6>CV</h6>
+        <h2>{{ summary.totalCV }}</h2>
+      </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <div class="card shadow p-3">
+        <h6>SV</h6>
+        <h2>{{ summary.totalSV }}</h2>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card shadow p-4 mt-4" *ngIf="summary">
+
+    <h4>Project Summary</h4>
+
+    <hr>
+
+    <p><strong>PV:</strong> {{ summary.totalPV }}</p>
+    <p><strong>EV:</strong> {{ summary.totalEV }}</p>
+    <p><strong>AC:</strong> {{ summary.totalAC }}</p>
+    <p><strong>EAC:</strong> {{ summary.totalEAC }}</p>
+    <p><strong>VAC:</strong> {{ summary.totalVAC }}</p>
+
+  </div>
+
+</div>
