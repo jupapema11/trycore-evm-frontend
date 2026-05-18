@@ -22,4 +22,8 @@ export class ProjectService {
   createProject(data: any): Observable<any> {
     return this.http.post(this.api, data);
   }
+
+  getProjects(): Observable<any> {
+    return this.http.get(this.api);
+  }
 }
