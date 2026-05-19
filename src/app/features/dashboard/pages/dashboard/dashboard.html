@@ -1,40 +1,88 @@
 <div class="dashboard-container">
-  <h1>Project Dashboard</h1>
 
-  <!-- Dropdown for selecting a project -->
-  <div class="project-selector">
-    <label for="project">Select Project:</label>
-    <select class="styled-select" (change)="onProjectChange($event)">
+  <header class="dashboard-header">
+    <div class="header-main-row">
+      <div>
+        <h1>Project Performance Dashboard</h1>
+        <p class="subtitle">Earned Value Management Overview</p>
+      </div>
+      <button class="btn btn-primary" type="button" (click)="openCreateProjectModal()">
+        New Project
+      </button>
+    </div>
+  </header>
 
-      <option value="">Select a project</option>
+  <section class="panel project-selector-row">
+    <div class="selector-group">
+      <label for="project" class="label">Project</label>
+      <select id="project" class="styled-select" (change)="onProjectChange($event)">
+        <option value="">Select a project</option>
+        @for (project of projects(); track project.id) {
+          <option [value]="project.id">{{ project.name }}</option>
+        }
+      </select>
+    </div>
 
-      <option *ngFor="let project of projects" [value]="project.id">
-        {{ project.name }}
-      </option>
+    <button
+      class="btn btn-secondary"
+      type="button"
+      [disabled]="!selectedProjectId()"
+      (click)="openCreateActivityModal()">
+      Add Activity
+    </button>
+  </section>
 
-    </select>
-  </div>
+  @if (summary(); as currentSummary) {
+    <section class="status-row">
+      <div class="status-card" [ngClass]="cpiStatusClass(currentSummary.totalCPI)">
+        <span class="status-label">CPI</span>
+        <span class="status-value">{{ currentSummary.totalCPI | number:'1.2-2' }}</span>
+        <span class="status-text">{{ currentSummary.cpiInterpretation }}</span>
+      </div>
 
-  <!-- Consolidated Indicators -->
-  <div class="consolidated-indicators">
-    <h2>Consolidated Indicators</h2>
+      <div class="status-card" [ngClass]="spiStatusClass(currentSummary.totalSPI)">
+        <span class="status-label">SPI</span>
+        <span class="status-value">{{ currentSummary.totalSPI | number:'1.2-2' }}</span>
+        <span class="status-text">{{ currentSummary.spiInterpretation }}</span>
+      </div>
+    </section>
 
-    <ul>
-      <li>Total PV: {{ consolidatedIndicators.totalPV | number:'1.2-2' }}</li>
-      <li>Total EV: {{ consolidatedIndicators.totalEV | number:'1.2-2' }}</li>
-      <li>Total AC: {{ consolidatedIndicators.totalAC | number:'1.2-2' }}</li>
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-title">Planned Value</span>
+        <span class="kpi-value">{{ currentSummary.totalPV | number:'1.2-2' }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-title">Earned Value</span>
+        <span class="kpi-value">{{ currentSummary.totalEV | number:'1.2-2' }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-title">Actual Cost</span>
+        <span class="kpi-value">{{ currentSummary.totalAC | number:'1.2-2' }}</span>
+      </div>
+      <div class="kpi-card highlight-green">
+        <span class="kpi-title">CPI</span>
+        <span class="kpi-value">{{ currentSummary.totalCPI | number:'1.2-2' }}</span>
+      </div>
+      <div class="kpi-card highlight-blue">
+        <span class="kpi-title">SPI</span>
+        <span class="kpi-value">{{ currentSummary.totalSPI | number:'1.2-2' }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-title">EAC</span>
+        <span class="kpi-value">{{ currentSummary.totalEAC | number:'1.2-2' }}</span>
+      </div>
+      <div class="kpi-card danger">
+        <span class="kpi-title">VAC</span>
+        <span class="kpi-value">{{ currentSummary.totalVAC | number:'1.2-2' }}</span>
+      </div>
+    </section>
+  }
 
-      <li>CPI: {{ consolidatedIndicators.totalCPI | number:'1.2-2' }}</li>
-      <li>SPI: {{ consolidatedIndicators.totalSPI | number:'1.2-2' }}</li>
-      <li>EAC: {{ consolidatedIndicators.totalEAC | number:'1.2-2' }}</li>
-      <li>VAC: {{ consolidatedIndicators.totalVAC | number:'1.2-2' }}</li>
-    </ul>
-  </div>
+  <section class="table-container">
+    <h2 class="section-title">Project Activities</h2>
 
-  <!-- Activities Table -->
-  <div class="activities-table">
-    <h2>Activities</h2>
-    <table>
+    <table class="table table-hover">
       <thead>
         <tr>
           <th>Name</th>
@@ -48,30 +96,97 @@
           <th>SV</th>
           <th>CPI</th>
           <th>SPI</th>
+          <th class="text-center">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let activity of activities">
-          <td>{{ activity.name }}</td>
-          <td>{{ activity.budgetAtCompletion }}</td>
-          <td>{{ activity.plannedProgressPercent }}</td>
-          <td>{{ activity.actualProgressPercent }}</td>
-          <td>{{ activity.actualCost }}</td>
-
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
+        @for (activity of activities(); track activity.id) {
+          <tr>
+            <td class="activity-name">{{ activity.name }}</td>
+            <td>{{ activity.budgetAtCompletion | number:'1.2-2' }}</td>
+            <td>{{ activity.plannedProgressPercent }}%</td>
+            <td>{{ activity.actualProgressPercent }}%</td>
+            <td>{{ activity.actualCost | number:'1.2-2' }}</td>
+            <td>{{ activity.pv | number:'1.2-2' }}</td>
+            <td>{{ activity.ev | number:'1.2-2' }}</td>
+            <td>{{ activity.cv | number:'1.2-2' }}</td>
+            <td>{{ activity.sv | number:'1.2-2' }}</td>
+            <td>
+              <span class="index-pill" [ngClass]="cpiStatusClass(activity.cpi)">
+                {{ activity.cpi | number:'1.2-2' }}
+              </span>
+            </td>
+            <td>
+              <span class="index-pill" [ngClass]="spiStatusClass(activity.spi)">
+                {{ activity.spi | number:'1.2-2' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-action btn-edit" type="button" (click)="editActivity(activity)">Edit</button>
+                <button class="btn-action btn-delete" type="button" (click)="deleteActivity(activity.id)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="12" class="empty-state">No activities available for this project</td>
+          </tr>
+        }
       </tbody>
     </table>
-  </div>
+  </section>
 
-  <!-- Placeholder for Chart -->
-  <div class="chart-container">
-    <h2>Performance Chart</h2>
-    <p>Chart will be displayed here.</p>
-  </div>
+  <section class="chart-container">
+    <h2>PV vs EV vs AC by Activity</h2>
+    @if (activities().length > 0) {
+      <div class="chart-wrapper">
+        <canvas baseChart [data]="chartData()" [options]="chartOptions" type="bar"></canvas>
+      </div>
+    } @else {
+      <p class="muted">Select a project with activities to visualize performance.</p>
+    }
+  </section>
 </div>
+
+@if (showProjectModal()) {
+  <div class="modal-backdrop" (click)="closeProjectModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>New Project</h3>
+      <label class="label" for="projectName">Name</label>
+      <input id="projectName" class="form-input" [(ngModel)]="projectForm.name" />
+      <div class="modal-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeProjectModal()">Cancel</button>
+        <button class="btn btn-primary" type="button" (click)="saveProject()">Save</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showActivityModal()) {
+  <div class="modal-backdrop" (click)="closeActivityModal()">
+    <div class="modal-card wide" (click)="$event.stopPropagation()">
+      <h3>{{ editingActivityId() ? 'Edit Activity' : 'New Activity' }}</h3>
+
+      <label class="label" for="activityName">Name</label>
+      <input id="activityName" class="form-input" [(ngModel)]="activityForm.name" />
+
+      <label class="label" for="bac">BAC</label>
+      <input id="bac" class="form-input" type="number" [(ngModel)]="activityForm.budgetAtCompletion" />
+
+      <label class="label" for="planned">Planned %</label>
+      <input id="planned" class="form-input" type="number" [(ngModel)]="activityForm.plannedProgressPercent" />
+
+      <label class="label" for="actual">Actual %</label>
+      <input id="actual" class="form-input" type="number" [(ngModel)]="activityForm.actualProgressPercent" />
+
+      <label class="label" for="ac">Actual Cost (AC)</label>
+      <input id="ac" class="form-input" type="number" [(ngModel)]="activityForm.actualCost" />
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeActivityModal()">Cancel</button>
+        <button class="btn btn-primary" type="button" (click)="saveActivity()">Save</button>
+      </div>
+    </div>
+  </div>
+}
