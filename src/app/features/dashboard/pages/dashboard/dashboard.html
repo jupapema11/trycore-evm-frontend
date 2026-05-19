@@ -1,77 +1,155 @@
 <div class="dashboard-container">
-  <h1>Project Dashboard</h1>
+  <header class="dashboard-header">
+    <h1>Project Dashboard</h1>
+    <p class="subtitle">Gestión integral de proyectos y actividades con EVM</p>
+  </header>
 
-  <!-- Dropdown for selecting a project -->
-  <div class="project-selector">
-    <label for="project">Select Project:</label>
-    <select class="styled-select" (change)="onProjectChange($event)">
-
-      <option value="">Select a project</option>
-
-      <option *ngFor="let project of projects" [value]="project.id">
+  <section class="toolbar-card">
+    <label for="projectSelect">Proyecto</label>
+    <select id="projectSelect" class="styled-select" (change)="onProjectChange($event)">
+      <option value="">Selecciona un proyecto</option>
+      <option *ngFor="let project of projects(); trackBy: trackByProjectId" [value]="project.id">
         {{ project.name }}
       </option>
-
     </select>
-  </div>
+  </section>
 
-  <!-- Consolidated Indicators -->
-  <div class="consolidated-indicators">
-    <h2>Consolidated Indicators</h2>
+  @if (summary(); as projectSummary) {
+    <section class="summary-grid">
+      <article class="metric-card">
+        <h3>PV</h3>
+        <p>{{ projectSummary.totalPV | number:'1.2-2' }}</p>
+      </article>
+      <article class="metric-card">
+        <h3>EV</h3>
+        <p>{{ projectSummary.totalEV | number:'1.2-2' }}</p>
+      </article>
+      <article class="metric-card">
+        <h3>AC</h3>
+        <p>{{ projectSummary.totalAC | number:'1.2-2' }}</p>
+      </article>
+      <article class="metric-card">
+        <h3>CPI</h3>
+        <p>{{ projectSummary.totalCPI | number:'1.2-2' }}</p>
+        <small>{{ projectSummary.cpiInterpretation }}</small>
+      </article>
+      <article class="metric-card">
+        <h3>SPI</h3>
+        <p>{{ projectSummary.totalSPI | number:'1.2-2' }}</p>
+        <small>{{ projectSummary.spiInterpretation }}</small>
+      </article>
+      <article class="metric-card">
+        <h3>EAC / VAC</h3>
+        <p>{{ projectSummary.totalEAC | number:'1.2-2' }}</p>
+        <small>VAC: {{ projectSummary.totalVAC | number:'1.2-2' }}</small>
+      </article>
+    </section>
+  }
 
-    <ul>
-      <li>Total PV: {{ consolidatedIndicators.totalPV | number:'1.2-2' }}</li>
-      <li>Total EV: {{ consolidatedIndicators.totalEV | number:'1.2-2' }}</li>
-      <li>Total AC: {{ consolidatedIndicators.totalAC | number:'1.2-2' }}</li>
+  <section class="table-card">
+    <div class="table-head">
+      <h2>Actividades</h2>
+      <button class="btn btn-primary" type="button" [disabled]="!selectedProjectId()" (click)="openCreateActivityModal()">
+        + Nueva actividad
+      </button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>BAC</th>
+            <th>% Plan</th>
+            <th>% Real</th>
+            <th>AC</th>
+            <th>PV</th>
+            <th>EV</th>
+            <th>CV</th>
+            <th>SV</th>
+            <th>CPI</th>
+            <th>SPI</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let activity of activities(); trackBy: trackByActivityId">
+            <td>{{ activity.name }}</td>
+            <td>{{ activity.budgetAtCompletion | number:'1.2-2' }}</td>
+            <td>{{ activity.plannedProgressPercent | number:'1.0-2' }}%</td>
+            <td>{{ activity.actualProgressPercent | number:'1.0-2' }}%</td>
+            <td>{{ activity.actualCost | number:'1.2-2' }}</td>
+            <td>{{ activity.pv | number:'1.2-2' }}</td>
+            <td>{{ activity.ev | number:'1.2-2' }}</td>
+            <td>{{ activity.cv | number:'1.2-2' }}</td>
+            <td>{{ activity.sv | number:'1.2-2' }}</td>
+            <td>{{ activity.cpi | number:'1.2-2' }}</td>
+            <td>{{ activity.spi | number:'1.2-2' }}</td>
+            <td class="actions">
+              <button class="btn btn-ghost" type="button" (click)="openEditActivityModal(activity)">Editar</button>
+              <button class="btn btn-danger" type="button" (click)="deleteActivity(activity.id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="activities().length === 0">
+            <td colspan="12" class="empty-row">No hay actividades para mostrar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-      <li>CPI: {{ consolidatedIndicators.totalCPI | number:'1.2-2' }}</li>
-      <li>SPI: {{ consolidatedIndicators.totalSPI | number:'1.2-2' }}</li>
-      <li>EAC: {{ consolidatedIndicators.totalEAC | number:'1.2-2' }}</li>
-      <li>VAC: {{ consolidatedIndicators.totalVAC | number:'1.2-2' }}</li>
-    </ul>
-  </div>
+  <section class="chart-container">
+    <h2>Gráfico PV / EV / AC</h2>
+    <div class="chart-wrapper">
+      <canvas baseChart [type]="'bar'" [data]="barChartData" [options]="barChartOptions"></canvas>
+    </div>
+  </section>
 
-  <!-- Activities Table -->
-  <div class="activities-table">
-    <h2>Activities</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>BAC</th>
-          <th>Planned %</th>
-          <th>Actual %</th>
-          <th>AC</th>
-          <th>PV</th>
-          <th>EV</th>
-          <th>CV</th>
-          <th>SV</th>
-          <th>CPI</th>
-          <th>SPI</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let activity of activities">
-          <td>{{ activity.name }}</td>
-          <td>{{ activity.budgetAtCompletion }}</td>
-          <td>{{ activity.plannedProgressPercent }}</td>
-          <td>{{ activity.actualProgressPercent }}</td>
-          <td>{{ activity.actualCost }}</td>
-
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Placeholder for Chart -->
-  <div class="chart-container">
-    <h2>Performance Chart</h2>
-    <p>Chart will be displayed here.</p>
-  </div>
+  <app-fab-menu [actions]="fabActions()" (actionSelected)="onFabAction($event)" />
 </div>
+
+@if (isProjectModalOpen()) {
+  <app-modal [title]="projectEditingId() ? 'Editar proyecto' : 'Nuevo proyecto'" (closed)="closeProjectModal()">
+    <div class="form-grid">
+      <label for="projectName">Nombre del proyecto</label>
+      <input id="projectName" type="text" [(ngModel)]="projectForm.name" />
+    </div>
+    <div modal-actions class="modal-actions">
+      <button class="btn btn-ghost" type="button" (click)="closeProjectModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" [disabled]="requestInProgress()" (click)="saveProject()">Guardar</button>
+    </div>
+  </app-modal>
+}
+
+@if (isActivityModalOpen()) {
+  <app-modal
+    [title]="activityEditingId() ? 'Editar actividad' : 'Nueva actividad'"
+    [wide]="true"
+    (closed)="closeActivityModal()">
+    <div class="form-grid form-grid--two">
+      <div class="field">
+        <label for="activityName">Nombre</label>
+        <input id="activityName" type="text" [(ngModel)]="activityForm.name" />
+      </div>
+      <div class="field">
+        <label for="activityBac">BAC</label>
+        <input id="activityBac" type="number" min="0" [(ngModel)]="activityForm.budgetAtCompletion" />
+      </div>
+      <div class="field">
+        <label for="activityPlanned">Porcentaje planificado</label>
+        <input id="activityPlanned" type="number" min="0" max="100" [(ngModel)]="activityForm.plannedProgressPercent" />
+      </div>
+      <div class="field">
+        <label for="activityActual">Porcentaje real</label>
+        <input id="activityActual" type="number" min="0" max="100" [(ngModel)]="activityForm.actualProgressPercent" />
+      </div>
+      <div class="field field--full">
+        <label for="activityCost">Costo actual (AC)</label>
+        <input id="activityCost" type="number" min="0" [(ngModel)]="activityForm.actualCost" />
+      </div>
+    </div>
+    <div modal-actions class="modal-actions">
+      <button class="btn btn-ghost" type="button" (click)="closeActivityModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" [disabled]="requestInProgress()" (click)="saveActivity()">Guardar</button>
+    </div>
+  </app-modal>
+}
