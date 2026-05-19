@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: trycore-evm-frontend
+    runtime: docker
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: API_URL
+        sync: false
