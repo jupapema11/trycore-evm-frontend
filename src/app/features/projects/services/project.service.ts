@@ -1,35 +1,32 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { Project, ProjectPayload } from '../../../core/models/project.model';
+import { ProjectSummary } from '../../../core/models/summary.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProjectService {
+  private readonly http = inject(HttpClient);
+  private readonly api = `${environment.apiUrl}/Projects`;
 
-  private http = inject(HttpClient);
-  private api = `${environment.apiUrl}/Projects`;
-
-  getSummary(projectId: string): Observable<any> {
-    return this.http.get(`${this.api}/${projectId}/summary`);
+  getProjects(): Observable<Project[]> {
+    return this.http.get<Project[]>(this.api);
   }
 
-  getActivities(projectId: string): Observable<any> {
-    return this.http.get(`${this.api}/${projectId}/activities`);
+  createProject(payload: ProjectPayload): Observable<Project> {
+    return this.http.post<Project>(this.api, payload);
   }
 
-  createProject(data: any): Observable<any> {
-    return this.http.post(this.api, data);
+  updateProject(id: string, payload: ProjectPayload): Observable<Project> {
+    return this.http.put<Project>(`${this.api}/${id}`, payload);
   }
 
-  getProjects(): Observable<any> {
-    return this.http.get(this.api);
+  deleteProject(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.api}/${id}`);
   }
 
-  getProjectSummary(projectId: string) {
-    return this.http.get<any>(
-      `https://localhost:44391/api/Projects/${projectId}/summary`
-    );
+  getProjectSummary(projectId: string): Observable<ProjectSummary> {
+    return this.http.get<ProjectSummary>(`${this.api}/${projectId}/summary`);
   }
 }
